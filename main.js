@@ -6,12 +6,20 @@ const { sessionBus, Message } = require('dbus-next');
 const DEFAULT_SHORTCUT = 'Super+Shift+1';
 let tray, settingsWindow, overlays = [], idleOverlays = [], toastWindow;
 let config = { shortcut: DEFAULT_SHORTCUT, launchAtLogin: false, history: [] };
-let ocrDataDir, ocrLanguages = 'eng';
+let ocrDataDir, ocrLanguages = 'eng', ocrBinary = 'tesseract', ocrLibraryDir;
 const configFile = () => path.join(app.getPath('userData'), 'settings.json');
 function usesKwinWayland() { return process.platform === 'linux' && (process.env.GRAB2TEXT_WAYLAND === '1' || (process.env.XDG_SESSION_TYPE === 'wayland' && /KDE/i.test(process.env.XDG_CURRENT_DESKTOP || ''))); }
 function saveConfig() { fs.mkdirSync(path.dirname(configFile()), { recursive: true }); fs.writeFileSync(configFile(), JSON.stringify(config, null, 2)); }
 function loadConfig() { try { config = { ...config, ...JSON.parse(fs.readFileSync(configFile(), 'utf8')) }; if (!Array.isArray(config.history)) config.history = []; } catch {} }
 function prepareOcrData() {
+  if (app.isPackaged) {
+    const bundledOcr = path.join(process.resourcesPath, 'ocr');
+    ocrBinary = path.join(bundledOcr, 'bin', 'tesseract');
+    ocrDataDir = path.join(bundledOcr, 'tessdata');
+    ocrLibraryDir = path.join(bundledOcr, 'lib');
+    ocrLanguages = 'tur+eng';
+    return;
+  }
   const dirs = [process.env.TESSDATA_PREFIX, '/usr/share/tessdata', '/usr/share/tesseract-ocr/5/tessdata', '/usr/share/tesseract-ocr/4.00/tessdata'].filter(Boolean);
   const find = name => dirs.map(dir => path.join(dir, name + '.traineddata')).find(file => fs.existsSync(file));
   const targetDir = path.join(app.getPath('userData'), 'tessdata');
@@ -139,7 +147,8 @@ async function startKwinCapture() {
 }
 function doOcr(dataUrl) {
   const encoded = dataUrl.replace(/^data:image\/png;base64,/, '');
-  const child = spawn('tesseract', ['stdin', 'stdout', '--tessdata-dir', ocrDataDir, '-l', ocrLanguages, '--psm', '6'], { stdio: ['pipe', 'pipe', 'ignore'] });
+  const env = ocrLibraryDir ? { ...process.env, LD_LIBRARY_PATH: [ocrLibraryDir, process.env.LD_LIBRARY_PATH].filter(Boolean).join(':') } : process.env;
+  const child = spawn(ocrBinary, ['stdin', 'stdout', '--tessdata-dir', ocrDataDir, '-l', ocrLanguages, '--psm', '6'], { stdio: ['pipe', 'pipe', 'ignore'], env });
   const chunks = [];
   child.stdout.on('data', chunk => chunks.push(chunk));
   child.on('error', () => { showToast('no text'); });

@@ -6,6 +6,11 @@ Wayland oturumlarında uygulama XWayland ile açılır ve ekranı KWin üzerinde
 
 ## Çalıştırma
 
+- Hazır paket için [GitHub Releases](https://github.com/erdinc11/cachyos-ocr-text-grabber/releases/latest) sayfasından `.run` dosyasını indirin. Özelliklerden çalıştırma iznini açıp çift tıklayın. Paket Electron'ı, Tesseract'ı ve Türkçe/İngilizce OCR modellerini içerir; ayrıca Node.js, Tesseract veya FUSE kurulumu gerekmez.
+- Terminalden çalıştırmak için `chmod +x CachyOS-OCR-Text-Grabber-*.run` ve `./CachyOS-OCR-Text-Grabber-*.run` komutlarını kullanın. İlk açılışta uygulama kendi dosyalarını `~/.cache/cachyos-ocr-text-grabber` içine çıkarır.
+
+## Kaynaktan çalıştırma
+
 - Node.js ve npm kurun.
 - Sistem OCR motoru olarak `tesseract` kurun. Türkçe OCR modeli projeyle birlikte gelir ve İngilizce modeliyle beraber kullanılır.
 - Proje klasöründe `npm install` ve ardından `npm start` çalıştırın.
