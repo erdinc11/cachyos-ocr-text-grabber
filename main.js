@@ -74,17 +74,17 @@ function refreshMenu() {
   if (!tray) return;
   const history = config.history.slice(0, 50);
   tray.setContextMenu(Menu.buildFromTemplate([
-    { label: 'Yakala  (' + config.shortcut.replace('Super', '⌘').replaceAll('+', ' + ') + ')', click: startCapture },
-    { label: 'Geçmiş', submenu: history.length ? history.map((item, i) => ({ label: (i + 1) + '. ' + item.replace(/\s+/g, ' ').slice(0, 72), click: () => { clipboard.writeText(item); showToast('copied'); } })) : [{ label: 'Henüz metin yok', enabled: false }] },
-    { label: 'Sistemle başlat', type: 'checkbox', checked: !!config.launchAtLogin, click: item => { config.launchAtLogin = item.checked; saveConfig(); writeAutostart(item.checked); } },
+    { label: 'Grab text  (' + config.shortcut.replace('Super', '⌘').replaceAll('+', ' + ') + ')', click: startCapture },
+    { label: 'History', submenu: history.length ? history.map((item, i) => ({ label: (i + 1) + '. ' + item.replace(/\s+/g, ' ').slice(0, 72), click: () => { clipboard.writeText(item); showToast('copied'); } })) : [{ label: 'No text yet', enabled: false }] },
+    { label: 'Launch at system startup', type: 'checkbox', checked: !!config.launchAtLogin, click: item => { config.launchAtLogin = item.checked; saveConfig(); writeAutostart(item.checked); } },
     { type: 'separator' },
-    { label: 'Ayarlar', click: openSettings },
-    { label: 'Tamamen kapat', click: () => app.quit() }
+    { label: 'Settings', click: openSettings },
+    { label: 'Quit Grab2Text', click: () => app.quit() }
   ]));
 }
 function openSettings() {
   if (settingsWindow && !settingsWindow.isDestroyed()) { settingsWindow.show(); settingsWindow.focus(); return; }
-  settingsWindow = new BrowserWindow({ width: 440, height: 390, title: 'Grab2Text Ayarları', resizable: false, autoHideMenuBar: true, webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true } });
+  settingsWindow = new BrowserWindow({ width: 440, height: 390, title: 'Grab2Text Settings', resizable: false, autoHideMenuBar: true, webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true } });
   settingsWindow.loadFile('index.html', { query: { mode: 'settings' } });
   settingsWindow.on('closed', () => settingsWindow = null);
 }

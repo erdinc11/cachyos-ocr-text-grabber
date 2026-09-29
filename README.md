@@ -1,18 +1,37 @@
-# Grab2Text
+# CachyOS OCR Text Grabber
 
-Linux sistem tepsisinde çalışan ekran OCR aracı. Varsayılan kısayol **Super (⌘) + Sol Shift + 1**. Kısayola basıp ekranın bir bölümünü sürükleyerek seçin; bulunan metin panoya kopyalanır.
+A Linux system-tray app that grabs text from a selected area of the screen. The default shortcut is **Super (⌘) + Left Shift + 1**. Drag over any text, including text in images or terminal windows, and the recognized text is copied to the clipboard.
 
-Wayland oturumlarında uygulama XWayland ile açılır ve ekranı KWin üzerinden kendi seçim ekranına bellekte alır. KWin yetkisi için uygulama `~/.local/share/applications/grab2text.desktop` dosyasını oluşturur.
+On KDE Wayland, the app captures the workspace through KWin and keeps the temporary frame in memory. It creates a local desktop entry so KWin can authorize screen capture. The selection overlay is rendered by the app; no system screenshot editor is opened.
 
-## Çalıştırma
+## Download and run
 
-- Hazır paket için [GitHub Releases](https://github.com/erdinc11/cachyos-ocr-text-grabber/releases/latest) sayfasından `.run` dosyasını indirin. Özelliklerden çalıştırma iznini açıp çift tıklayın. Paket Electron'ı, Tesseract'ı ve Türkçe/İngilizce OCR modellerini içerir; ayrıca Node.js, Tesseract veya FUSE kurulumu gerekmez.
-- Terminalden çalıştırmak için `chmod +x CachyOS-OCR-Text-Grabber-*.run` ve `./CachyOS-OCR-Text-Grabber-*.run` komutlarını kullanın. İlk açılışta uygulama kendi dosyalarını `~/.cache/cachyos-ocr-text-grabber` içine çıkarır.
+Download the latest `.run` file from [GitHub Releases](https://github.com/erdinc11/cachyos-ocr-text-grabber/releases/latest). Allow it to run in the file's Properties, then double-click it. The package includes Electron, Tesseract, and the English and Turkish OCR models; Node.js, Tesseract, and FUSE do not need to be installed separately.
 
-## Kaynaktan çalıştırma
+To run it from a terminal:
 
-- Node.js ve npm kurun.
-- Sistem OCR motoru olarak `tesseract` kurun. Türkçe OCR modeli projeyle birlikte gelir ve İngilizce modeliyle beraber kullanılır.
-- Proje klasöründe `npm install` ve ardından `npm start` çalıştırın.
+```sh
+chmod +x CachyOS-OCR-Text-Grabber-*.run
+./CachyOS-OCR-Text-Grabber-*.run
+```
 
-Tepsi menüsünden ayarlar, son 50 öğelik geçmiş, sistemle başlat ve tamamen kapat seçeneklerine ulaşılır. OCR için ekran kırpımı bellekte işlenir ve diske yazılmaz. Geçmiş metinleri uygulamanın kullanıcı ayarlarında saklanır.
+On first launch, the app extracts its files to `~/.cache/cachyos-ocr-text-grabber`.
+
+## Run from source
+
+- Install Node.js, npm, Tesseract, and the English `eng.traineddata` model.
+- The Turkish `tur.traineddata` model is included in this repository.
+- Run `npm install`, then `npm start` from the project directory.
+
+## Build a release package
+
+On CachyOS/Arch Linux x86_64, install Tesseract and its English language data, then run:
+
+```sh
+npm install
+npm run release:linux
+```
+
+The self-extracting runner is written to `dist/`. It includes Electron, Tesseract, both OCR models, and Tesseract's shared libraries. The target machine still needs the standard Linux desktop libraries used by Electron. KDE Wayland screen capture requires KWin.
+
+The tray menu provides text capture, the last 50 copied results, launch at system startup, settings, and quit. OCR crops are processed in memory and are not saved to disk. History text is stored in the app's user settings.

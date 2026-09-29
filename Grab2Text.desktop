@@ -2,7 +2,7 @@
 Version=1.0
 Type=Application
 Name=Grab2Text
-Comment=Ekrandaki metni seçip panoya kopyala
+Comment=Select text on screen and copy it to the clipboard
 Exec=/home/anon/Belgeler/grab2text/scripts/start.sh
 Path=/home/anon/Belgeler/grab2text
 Icon=/home/anon/Belgeler/grab2text/assets/tray.png

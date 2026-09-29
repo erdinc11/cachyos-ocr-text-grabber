@@ -4,10 +4,10 @@ if (mode === 'settings') {
   document.body.style.background = '#18181b';
   const panel = document.getElementById('settings'), button = document.getElementById('shortcut');
   panel.hidden = false;
-  const pretty = value => value.replace('Super', '⌘').replace('Command', '⌘').replace('Control', 'Ctrl').replace('Shift', 'Sol Shift').replaceAll('+', ' + ');
+  const pretty = value => value.replace('Super', '⌘').replace('Command', '⌘').replace('Control', 'Ctrl').replace('Shift', 'Left Shift').replaceAll('+', ' + ');
   window.grab.getConfig().then(config => { button.textContent = pretty(config.shortcut); document.getElementById('current').textContent = pretty(config.shortcut); });
   let recording = false;
-  button.addEventListener('click', () => { recording = true; button.classList.add('recording'); button.textContent = 'Yeni kısayola basın…'; });
+  button.addEventListener('click', () => { recording = true; button.classList.add('recording'); button.textContent = 'Press a new shortcut…'; });
   window.addEventListener('keydown', async event => {
     if (!recording) return;
     event.preventDefault(); event.stopPropagation();
@@ -25,7 +25,7 @@ if (mode === 'settings') {
     recording = false; button.classList.remove('recording');
     button.textContent = pretty(result.shortcut);
     document.getElementById('current').textContent = pretty(result.shortcut);
-    document.getElementById('hint').textContent = result.ok ? 'Kısayol kaydedildi.' : 'Bu kısayol kullanılamıyor; önceki kısayol korundu.';
+    document.getElementById('hint').textContent = result.ok ? 'Shortcut saved.' : 'This shortcut is unavailable; the previous shortcut was kept.';
   }, true);
 } else if (mode === 'overlay') {
   document.body.style.background = 'transparent';

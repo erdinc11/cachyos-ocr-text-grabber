@@ -1,6 +1,6 @@
 {
   "name": "grab2text",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Erdinç Coşkun",
   "desktopName": "cachyos-ocr-text-grabber",
   "description": "Tray based screen text grabber",
