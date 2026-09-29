@@ -1,0 +1,17 @@
+{
+  "name": "grab2text",
+  "version": "1.0.0",
+  "description": "Tray based screen text grabber",
+  "main": "main.js",
+  "scripts": {
+    "start": "sh scripts/start.sh",
+    "postinstall": "node scripts/rebuild-usocket.js"
+  },
+  "devDependencies": {
+    "electron": "38.8.6"
+  },
+  "dependencies": {
+    "dbus-next": "^0.10.2",
+    "usocket": "^1.1.0"
+  }
+}

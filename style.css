@@ -1,0 +1,14 @@
+* { box-sizing: border-box; }
+body { margin: 0; font: 14px/1.45 Inter, ui-sans-serif, system-ui, sans-serif; color: #f4f4f5; background: #18181b; }
+#settings { padding: 28px 30px; }
+h1 { margin: 0 0 12px; font-size: 22px; }
+p { color: #c4c4cc; }
+#shortcut { width: 100%; height: 54px; margin: 10px 0; border: 1px solid #494950; border-radius: 12px; color: white; background: #27272a; font-size: 17px; cursor: pointer; }
+#shortcut.recording { border-color: #ef4444; box-shadow: 0 0 0 3px #ef444433; }
+small, .note { color: #a1a1aa; }
+#overlay { position: fixed; inset: 0; cursor: crosshair; background-position: center; background-repeat: no-repeat; background-size: 100% 100%; }
+#selection { display: none; position: fixed; z-index: 2; border: 2px solid #fff; background: rgba(255, 255, 255, .15); pointer-events: none; }
+.overlay-tip { position: fixed; z-index: 4; left: 50%; bottom: 28px; transform: translateX(-50%); padding: 9px 15px; border-radius: 12px; background: #18181de8; color: white; box-shadow: 0 3px 18px #0008; pointer-events: none; }
+#toast { position: fixed; inset: 0; display: grid; place-items: center; }
+#toast span { padding: 10px 18px; border-radius: 14px; color: white; background: #202024ed; box-shadow: 0 5px 22px #0005; font-weight: 600; }
+[hidden] { display: none !important; }

@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Grab2Text
+Comment=Ekrandaki metni seçip panoya kopyala
+Exec=/home/anon/Belgeler/grab2text/scripts/start.sh
+Path=/home/anon/Belgeler/grab2text
+Icon=/home/anon/Belgeler/grab2text/assets/tray.png
+Terminal=false
+Categories=Utility;
+StartupNotify=false
