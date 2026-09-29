@@ -22,6 +22,16 @@
   "build": {
     "appId": "com.grab2text.cachyosocrtextgrabber",
     "productName": "CachyOS OCR Text Grabber",
+    "files": [
+      "!build/**",
+      "!dist/**",
+      "!squashfs-root/**",
+      "!scripts/**",
+      "!README.md",
+      "!Grab2Text.desktop",
+      "!AGENTS.md",
+      "!assets/tessdata/**"
+    ],
     "asarUnpack": [
       "node_modules/usocket/**"
     ],
