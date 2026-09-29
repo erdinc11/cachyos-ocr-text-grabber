@@ -6,7 +6,9 @@ On KDE Wayland, the app captures the workspace through KWin and keeps the tempor
 
 ## Download and run
 
-Download the latest `.run` file from [GitHub Releases](https://github.com/erdinc11/cachyos-ocr-text-grabber/releases/latest). Allow it to run in the file's Properties, then double-click it. The package includes Electron, Tesseract, and the English and Turkish OCR models; Node.js, Tesseract, and FUSE do not need to be installed separately.
+Download the latest `.AppImage` from [GitHub Releases](https://github.com/erdinc11/cachyos-ocr-text-grabber/releases/latest). Allow it to run in the file's Properties, then double-click it. The package includes Electron, Tesseract, and the English and Turkish OCR models; Node.js and Tesseract do not need to be installed separately. A working FUSE 2 setup is required by the AppImage runtime.
+
+If FUSE 2 is unavailable, download the `.run` file from the same release instead. It includes the same app and OCR files and extracts them to `~/.cache/cachyos-ocr-text-grabber` on first launch.
 
 To run it from a terminal:
 
@@ -32,6 +34,6 @@ npm install
 npm run release:linux
 ```
 
-The self-extracting runner is written to `dist/`. It includes Electron, Tesseract, both OCR models, and Tesseract's shared libraries. The target machine still needs the standard Linux desktop libraries used by Electron. KDE Wayland screen capture requires KWin.
+The AppImage and self-extracting runner are written to `dist/`. Both include Electron, Tesseract, both OCR models, and Tesseract's shared libraries. The target machine still needs the standard Linux desktop libraries used by Electron. KDE Wayland screen capture requires KWin.
 
 The tray menu provides text capture, the last 50 copied results, launch at system startup, settings, and quit. OCR crops are processed in memory and are not saved to disk. History text is stored in the app's user settings.
