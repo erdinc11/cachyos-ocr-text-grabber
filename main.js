@@ -2,24 +2,16 @@ const { app, BrowserWindow, Tray, Menu, globalShortcut, desktopCapturer, screen,
 const { spawn } = require('node:child_process');
 const fs = require('node:fs');
 const path = require('node:path');
-const { sessionBus, Message } = require('dbus-next');
+const { sessionBus, Message, Variant } = require('dbus-next');
 const DEFAULT_SHORTCUT = 'Super+Shift+1';
 let tray, settingsWindow, overlays = [], idleOverlays = [], toastWindow;
 let config = { shortcut: DEFAULT_SHORTCUT, launchAtLogin: false, history: [] };
-let ocrDataDir, ocrLanguages = 'eng', ocrBinary = 'tesseract', ocrLibraryDir;
+let ocrDataDir, ocrLanguages = 'eng', ocrBinary = 'tesseract';
 const configFile = () => path.join(app.getPath('userData'), 'settings.json');
 function usesKwinWayland() { return process.platform === 'linux' && (process.env.GRAB2TEXT_WAYLAND === '1' || (process.env.XDG_SESSION_TYPE === 'wayland' && /KDE/i.test(process.env.XDG_CURRENT_DESKTOP || ''))); }
 function saveConfig() { fs.mkdirSync(path.dirname(configFile()), { recursive: true }); fs.writeFileSync(configFile(), JSON.stringify(config, null, 2)); }
 function loadConfig() { try { config = { ...config, ...JSON.parse(fs.readFileSync(configFile(), 'utf8')) }; if (!Array.isArray(config.history)) config.history = []; } catch {} }
 function prepareOcrData() {
-  if (app.isPackaged) {
-    const bundledOcr = path.join(process.resourcesPath, 'ocr');
-    ocrBinary = path.join(bundledOcr, 'bin', 'tesseract');
-    ocrDataDir = path.join(bundledOcr, 'tessdata');
-    ocrLibraryDir = path.join(bundledOcr, 'lib');
-    ocrLanguages = 'tur+eng';
-    return;
-  }
   const dirs = [process.env.TESSDATA_PREFIX, '/usr/share/tessdata', '/usr/share/tesseract-ocr/5/tessdata', '/usr/share/tesseract-ocr/4.00/tessdata'].filter(Boolean);
   const find = name => dirs.map(dir => path.join(dir, name + '.traineddata')).find(file => fs.existsSync(file));
   const targetDir = path.join(app.getPath('userData'), 'tessdata');
@@ -98,11 +90,15 @@ async function startCapture() {
   }
   const displays = screen.getAllDisplays();
   try {
-    const sources = await desktopCapturer.getSources({ types: ['screen'], thumbnailSize: { width: 3840, height: 2160 }, fetchWindowIcons: false });
+    const thumbnailSize = displays.reduce((size, display) => ({
+      width: Math.max(size.width, Math.round(display.bounds.width * display.scaleFactor)),
+      height: Math.max(size.height, Math.round(display.bounds.height * display.scaleFactor))
+    }), { width: 1, height: 1 });
+    const sources = await desktopCapturer.getSources({ types: ['screen'], thumbnailSize, fetchWindowIcons: false });
     overlays = displays.map(display => {
       const source = sources.find(s => s.display_id === String(display.id)) || sources[displays.indexOf(display)];
       if (!source || source.thumbnail.isEmpty()) return null;
-      const win = new BrowserWindow({ x: display.bounds.x, y: display.bounds.y, width: display.bounds.width, height: display.bounds.height, frame: false, transparent: true, backgroundColor: '#00000000', resizable: false, movable: false, skipTaskbar: true, alwaysOnTop: true, hasShadow: false, show: false, opacity: 0, webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true } });
+      const win = new BrowserWindow({ x: display.bounds.x, y: display.bounds.y, width: display.bounds.width, height: display.bounds.height, fullscreen: true, frame: false, transparent: true, backgroundColor: '#00000000', resizable: false, movable: false, skipTaskbar: true, alwaysOnTop: true, hasShadow: false, show: false, opacity: 0, webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true } });
       win.setAlwaysOnTop(true, 'screen-saver');
       win.loadFile('index.html', { query: { mode: 'overlay' } });
       win.webContents.once('did-finish-load', () => win.webContents.send('overlay:init', { image: source.thumbnail.toDataURL(), display: { width: display.bounds.width, height: display.bounds.height, scaleFactor: display.scaleFactor } }));
@@ -120,7 +116,7 @@ async function startKwinCapture() {
   const bus = sessionBus({ negotiateUnixFd: true });
   let timeout;
   try {
-    const request = bus.call(new Message({ destination: 'org.kde.KWin.ScreenShot2', path: '/org/kde/KWin/ScreenShot2', interface: 'org.kde.KWin.ScreenShot2', member: 'CaptureWorkspace', signature: 'a{sv}h', body: [{}, fd] }));
+    const request = bus.call(new Message({ destination: 'org.kde.KWin.ScreenShot2', path: '/org/kde/KWin/ScreenShot2', interface: 'org.kde.KWin.ScreenShot2', member: 'CaptureWorkspace', signature: 'a{sv}h', body: [{ 'native-resolution': new Variant('b', true) }, fd] }));
     const reply = await Promise.race([request, new Promise((_, reject) => { timeout = setTimeout(() => reject(new Error('KWin capture timed out')), 6000); })]);
     if (reply.type !== 2 || !reply.body[0]) throw new Error('KWin capture failed');
     const metadata = reply.body[0], value = key => metadata[key] && metadata[key].value !== undefined ? metadata[key].value : metadata[key];
@@ -132,7 +128,7 @@ async function startKwinCapture() {
     if (size < expected) throw new Error('Incomplete KWin frame (' + size + '/' + expected + ')');
     const raw = Buffer.alloc(expected);
     fs.readSync(fd, raw, 0, expected, 0);
-    const window = new BrowserWindow({ x: bounds.x, y: bounds.y, width: bounds.right - bounds.x, height: bounds.bottom - bounds.y, frame: false, transparent: true, backgroundColor: '#00000000', resizable: false, movable: false, skipTaskbar: true, alwaysOnTop: true, hasShadow: false, show: false, opacity: 0, webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true } });
+    const window = new BrowserWindow({ x: bounds.x, y: bounds.y, width: bounds.right - bounds.x, height: bounds.bottom - bounds.y, fullscreen: true, frame: false, transparent: true, backgroundColor: '#00000000', resizable: false, movable: false, skipTaskbar: true, alwaysOnTop: true, hasShadow: false, show: false, opacity: 0, webPreferences: { preload: path.join(__dirname, 'preload.js'), contextIsolation: true } });
     window.setAlwaysOnTop(true, 'screen-saver');
     window.loadFile('index.html', { query: { mode: 'overlay' } });
     window.webContents.once('did-finish-load', () => window.webContents.send('overlay:init', { image: raw, raw: true, width, height, stride, format }));
@@ -147,8 +143,7 @@ async function startKwinCapture() {
 }
 function doOcr(dataUrl) {
   const encoded = dataUrl.replace(/^data:image\/png;base64,/, '');
-  const env = ocrLibraryDir ? { ...process.env, LD_LIBRARY_PATH: [ocrLibraryDir, process.env.LD_LIBRARY_PATH].filter(Boolean).join(':') } : process.env;
-  const child = spawn(ocrBinary, ['stdin', 'stdout', '--tessdata-dir', ocrDataDir, '-l', ocrLanguages, '--psm', '6'], { stdio: ['pipe', 'pipe', 'ignore'], env });
+  const child = spawn(ocrBinary, ['stdin', 'stdout', '--tessdata-dir', ocrDataDir, '-l', ocrLanguages, '--psm', '6'], { stdio: ['pipe', 'pipe', 'ignore'] });
   const chunks = [];
   child.stdout.on('data', chunk => chunks.push(chunk));
   child.on('error', () => { showToast('no text'); });
@@ -184,6 +179,7 @@ function destroyOverlay(win) {
   if (!win || win.isDestroyed()) return;
   overlays = overlays.filter(item => item !== win);
   win.setOpacity(0);
+  if (win.isFullScreen()) win.setFullScreen(false);
   win.setIgnoreMouseEvents(true);
   win.setFocusable(false);
   if (!idleOverlays.includes(win)) idleOverlays.push(win);

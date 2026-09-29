@@ -7,56 +7,13 @@
   "main": "main.js",
   "scripts": {
     "start": "sh scripts/start.sh",
-    "dist:linux": "node scripts/prepare-ocr-bundle.js && electron-builder --linux AppImage",
-    "release:linux": "npm run dist:linux",
     "postinstall": "node scripts/rebuild-usocket.js"
   },
   "devDependencies": {
-    "electron": "38.8.6",
-    "electron-builder": "^26.15.3"
+    "electron": "38.8.6"
   },
   "dependencies": {
     "dbus-next": "^0.10.2",
     "usocket": "^1.1.0"
-  },
-  "build": {
-    "appId": "com.grab2text.cachyosocrtextgrabber",
-    "productName": "CachyOS OCR Text Grabber",
-    "files": [
-      "!build/**",
-      "!dist/**",
-      "!squashfs-root/**",
-      "!scripts/**",
-      "!README.md",
-      "!Grab2Text.desktop",
-      "!AGENTS.md",
-      "!assets/tessdata/**"
-    ],
-    "asarUnpack": [
-      "node_modules/usocket/**"
-    ],
-    "extraResources": [
-      {
-        "from": "build/ocr",
-        "to": "ocr"
-      }
-    ],
-    "linux": {
-      "target": [
-        {
-          "target": "AppImage",
-          "arch": [
-            "x64"
-          ]
-        }
-      ],
-      "category": "Utility",
-      "icon": "assets/icon.png",
-      "syncDesktopName": true,
-      "executableArgs": [
-        "--ozone-platform=x11"
-      ],
-      "artifactName": "CachyOS-OCR-Text-Grabber-${version}-${arch}.${ext}"
-    }
   }
 }
