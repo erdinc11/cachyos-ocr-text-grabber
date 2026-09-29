@@ -8,7 +8,7 @@
   "scripts": {
     "start": "sh scripts/start.sh",
     "dist:linux": "node scripts/prepare-ocr-bundle.js && electron-builder --linux AppImage",
-    "release:linux": "npm run dist:linux && node scripts/make-portable-runner.js",
+    "release:linux": "npm run dist:linux",
     "postinstall": "node scripts/rebuild-usocket.js"
   },
   "devDependencies": {
